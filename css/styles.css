@@ -1,0 +1,43 @@
+
+
+
+
+header a img, footer a img{
+    
+    width : 50px;
+    height : auto;
+  }
+
+
+  header > a, footer a{
+    text-align: left;
+  }
+  
+  .rotate {
+    animation: rotation 2s;
+  }
+  
+  @keyframes rotation {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(359deg);
+    }
+  }
+  
+  .linear {
+    animation-timing-function: linear;
+  }
+  
+  .infinite {
+    animation-iteration-count: infinite;
+  }
+  
+  .rotate-image {
+    animation: rotation 2s linear infinite;
+  }
+  
+
+
+

@@ -187,7 +187,7 @@
         frBtn.type = "button";
         frBtn.dataset.text = fr;
         frBtn.innerHTML = `${fr} <span class="icon">🔊</span>`;
-        frBtn.addEventListener("click", () => speakFrench(fr));
+        frBtn.addEventListener("click", () => playFrench(fr, row, frBtn));
         row.appendChild(frBtn);
 
         // arrow
@@ -205,29 +205,163 @@
       });
     }
 
-    // ----- TTS (French) -----
-    function speakFrench(text) {
-      if (!("speechSynthesis" in window)) {
-        alert("Speech synthesis is not supported in this browser.");
-        return;
-      }
-      const utter = new SpeechSynthesisUtterance(text);
-      // Prefer French voice if available
-      const pickVoice = () => {
-        const voices = window.speechSynthesis.getVoices();
-        const frVoices = voices.filter(v => /fr(-|_|$)/i.test(v.lang));
-        if (frVoices.length) utter.voice = frVoices[0];
-        utter.lang = (utter.voice && utter.voice.lang) || "fr-FR";
-        window.speechSynthesis.cancel(); // stop anything currently speaking
-        window.speechSynthesis.speak(utter);
-      };
-      // voices may load async
-      if (speechSynthesis.getVoices().length === 0) {
-        speechSynthesis.onvoiceschanged = pickVoice;
-      } else {
-        pickVoice();
-      }
+    
+
+    // ====== Free TTS via Google Translate + caching + UI state ======
+const TTS_BASE = "https://translate.google.com/translate_tts";
+const TTS_LANG = "fr";              // French
+const TTS_CLIENT = "tw-ob";         // public client used by Translate
+const MAX_CHARS = 180;              // stay well under the ~200 char limit
+
+let currentAudio = null;
+let currentRow = null;
+let currentBtn = null;
+const audioCache = new Map();       // text -> objectURL
+
+// Normalize curly quotes/accents & collapse whitespace for consistent cache keys
+function normalizeKey(s) {
+  return s
+    .replaceAll("\u2019", "'")          // curly apostrophe -> straight
+    .replaceAll("\u00A0", " ")          // non-breaking space -> space
+    .replaceAll(/\s+/g, " ")            // collapse spaces
+    .trim();
+}
+
+// Simple debounce to avoid spamming the endpoint
+let tapLock = false;
+function debounceTap(ms = 250) {
+  if (tapLock) return true;
+  tapLock = true;
+  setTimeout(() => (tapLock = false), ms);
+  return false;
+}
+
+function setPlayingUI(row, btn, isPlaying) {
+  if (!row || !btn) return;
+  row.classList.toggle("is-playing", isPlaying);
+  btn.setAttribute("aria-pressed", String(isPlaying));
+  // swap the little icon (🔊 -> ⏸️ while playing)
+  const icon = btn.querySelector(".icon");
+  if (icon) icon.textContent = isPlaying ? "⏸️" : "🔊";
+}
+
+function stopCurrent() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+  setPlayingUI(currentRow, currentBtn, false);
+  currentRow = null;
+  currentBtn = null;
+}
+
+// Chunk text if somehow longer (keeps endpoint happy). For single words this won’t trigger.
+function chunkText(text, maxLen = MAX_CHARS) {
+  if (text.length <= maxLen) return [text];
+  const parts = [];
+  let start = 0;
+  while (start < text.length) {
+    parts.push(text.slice(start, start + maxLen));
+    start += maxLen;
+  }
+  return parts;
+}
+
+async function fetchTTSBlob(text) {
+  const url = `${TTS_BASE}?ie=UTF-8&client=${encodeURIComponent(TTS_CLIENT)}&tl=${encodeURIComponent(TTS_LANG)}&q=${encodeURIComponent(text)}`;
+  const res = await fetch(url, { mode: "cors" });
+  if (!res.ok) throw new Error("TTS HTTP " + res.status);
+  return await res.blob();
+}
+
+async function getAudioURLFor(text) {
+  const key = normalizeKey(text);
+  if (audioCache.has(key)) return audioCache.get(key);
+
+  // For long strings, stitch multiple blobs (rare for your use-case, but safe)
+  const chunks = chunkText(key);
+  if (chunks.length === 1) {
+    const blob = await fetchTTSBlob(chunks[0]);
+    const url = URL.createObjectURL(blob);
+    audioCache.set(key, url);
+    return url;
+  } else {
+    // Concatenate sequentially by playing back-to-back (no single URL). Return a marker.
+    return { sequenced: chunks };
+  }
+}
+
+function playSequentially(parts, row, btn) {
+  // Play multiple short clips one after another (edge case).
+  let index = 0;
+  const playNext = () => {
+    if (index >= parts.length) {
+      stopCurrent();
+      return;
     }
+    fetchTTSBlob(parts[index++])
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        currentAudio = audio;
+        audio.onended = playNext;
+        audio.onerror = () => stopCurrent();
+        audio.play().catch(stopCurrent);
+      })
+      .catch(stopCurrent);
+  };
+  playNext();
+}
+
+function tryWebSpeechFallback(text) {
+  if (!("speechSynthesis" in window)) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  const fr = speechSynthesis.getVoices().find(v => /fr(-|_|$)/i.test(v.lang));
+  if (fr) utter.voice = fr;
+  utter.lang = (fr && fr.lang) || "fr-FR";
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+}
+
+async function playFrench(text, row, btn) {
+  if (debounceTap()) return; // ignore rapid double taps
+
+  try {
+    // Stop anything currently playing
+    stopCurrent();
+
+    currentRow = row;
+    currentBtn = btn;
+    setPlayingUI(currentRow, currentBtn, true);
+
+    const audioURL = await getAudioURLFor(text);
+
+    if (typeof audioURL === "string") {
+      const audio = new Audio(audioURL);
+      currentAudio = audio;
+      audio.onended = () => stopCurrent();
+      audio.onerror = () => {
+        stopCurrent();
+        tryWebSpeechFallback(text); // graceful fallback
+      };
+      await audio.play();
+    } else if (audioURL && audioURL.sequenced) {
+      playSequentially(audioURL.sequenced, row, btn);
+    } else {
+      // Unexpected — just fallback
+      stopCurrent();
+      tryWebSpeechFallback(text);
+    }
+  } catch (err) {
+    console.warn("TTS error:", err);
+    stopCurrent();
+    tryWebSpeechFallback(text);
+  }
+}
+
+
+    
 
     // ----- Init -----
     renderSets();

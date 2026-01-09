@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>French learning</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="static/css/styles.css">
+
+
+</head>
+<body>
+
+
+  <!-- Navigation Bar-->
+  <div class="container ">
+    <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom ">
+      <!--
+      <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+        <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
+        <span class="fs-4">Simple header</span>
+      </a>
+    -->
+      <a href="./index" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+        <img src="./static/images/French_Logo.jpg" alt="French Learning">
+      </a>
+  
+      <ul class="nav nav-pills" >
+        <li class="nav-item"><a href="./index.html" class="nav-link text-body-secondary">Home</a></li>
+        <li class="nav-item"><a href="./words.html" class="nav-link text-body-secondary">Words</a></li>
+        <li class="nav-item"><a href="./tutor.html" class="nav-link text-body-secondary">Tutor</a></li>
+        <li class="nav-item"><a href="./practice.html" class="nav-link active bg-dark" aria-current="page">Practice</a></li>
+        <!--
+        <li class="nav-item"><a href="./media.html" class="nav-link text-body-secondary">Media</a></li>
+        <li class="nav-item"><a href="./contact.html" class="nav-link text-body-secondary">Contact</a></li>
+        <li class="nav-item"><a href="./team.html" class="nav-link text-body-secondary">Team</a></li>
+        -->
+        
+      </ul>
+    </header>
+  </div>
+
+
+  
+
+
+  <div class="container mb-4">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <h1 class="display-6 fw-bold">Practice Quiz</h1>
+        <p class="lead mb-0">Pick the correct English meaning for each French word. 3 options per question.</p>
+      </div>
+      <div class="col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Questions</span>
+              <select id="questionCount" class="form-select form-select-sm" style="max-width: 110px;">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+              </select>
+            </div>
+            <button id="btnStart" class="btn btn-dark w-100">Start Quiz</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Quiz area -->
+    <div id="quizArea" class="card shadow-sm question-box d-none">
+      <div class="card-header bg-light d-flex align-items-center justify-content-between">
+        <div>
+          <span class="badge bg-secondary pill" id="progressPill">Q 1/10</span>
+          <span class="badge bg-primary pill ms-2" id="scorePill">Score: 0</span>
+        </div>
+        <button id="btnReplayTop" class="btn btn-sm btn-outline-secondary d-none" type="button">Replay</button>
+      </div>
+
+      <div class="card-body">
+        <h3 class="fw-bold mb-3" id="questionText">bonjour</h3>
+        <div class="text-muted mb-3" id="metaText"></div>
+
+        <div class="d-grid gap-2" id="options"></div>
+
+        <div class="mt-3 d-flex gap-2">
+          <button id="btnNext" class="btn btn-primary d-none" type="button">Next</button>
+          <button id="btnStop" class="btn btn-outline-danger d-none" type="button">Stop Quiz</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result area -->
+    <div id="resultArea" class="card shadow-sm d-none">
+      <div class="card-body text-center">
+        <h2 class="fw-bold mb-2">Your Score</h2>
+        <div class="display-6 mb-3" id="finalScore">0 / 10</div>
+        <button id="btnReplay" class="btn btn-dark">Replay Quiz</button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+  <!--Footer-->
+  <div class="container">
+    <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+      <p class="col-md-4 mb-0 text-body-secondary">© 2025 French Learning Website</p>
+      <p class="col-md-4 mb-0 text-body-secondary">Designed and Developed by Vishal Reddy</p>
+    </footer>
+  </div>
+  
+
+  <!-- Load DATA first -->
+  <script src="static/js/words-data.js"></script>
+  <script src="static/js/practice.js"></script>
+
+</body>
+</html>

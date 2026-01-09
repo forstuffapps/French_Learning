@@ -1,0 +1,233 @@
+
+
+
+
+header a img, footer a img{
+    
+    width : 50px;
+    height : auto;
+  }
+
+
+
+
+  header > a, footer a{
+    text-align: left;
+  }
+  
+  .rotate {
+    animation: rotation 2s;
+  }
+  
+  @keyframes rotation {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(359deg);
+    }
+  }
+  
+  .linear {
+    animation-timing-function: linear;
+  }
+  
+  .infinite {
+    animation-iteration-count: infinite;
+  }
+  
+  .rotate-image {
+    animation: rotation 2s linear infinite;
+  }
+  
+
+
+  .word-row.is-playing { 
+    background: #fff4e5; 
+    outline: 2px solid #ffd8a8;
+  }
+  .speak .icon { margin-left: .25rem; opacity: .75; }
+
+  
+
+  .word-row.is-playing {
+    background: #fff4e5;
+    outline: 2px solid #ffd8a8;
+  }
+  .speak:focus-visible {
+    outline: 2px solid #0d6efd;
+    border-radius: .5rem;
+  }
+   
+
+
+
+  /* French flag button colors */
+.set-btn{
+  background: #ffffff ;   /* Blue */
+  color: #212529 ;
+  border: 1px solid #212529 ;
+}
+
+.section-btn{
+  background: #ffffff ;  /* Red */
+  color: #212529 ;
+  border: 1px solid #212529 ;
+}
+
+.set-btn:hover,
+.section-btn:hover{
+  filter: brightness(0.95);
+}
+
+.set-btn.active{
+  background: #00418A ;
+  color: #fff ;
+  border-color: #00418A ;
+}
+
+.section-btn.active{
+  background: #D83A2F ;
+  color: #fff ;
+  border-color: #D83A2F ;
+}
+
+
+
+
+  /* =========================
+   Tutor Page
+   ========================= */
+
+
+  /* Center content vertically + horizontally */
+.construction-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Image styling */
+.construction-img {
+  max-width: 480px;
+  width: 100%;
+  height: auto;
+  opacity: 0.9;
+}
+
+/* Under construction text */
+.construction-text {
+  color: #ff2137;
+  letter-spacing: 1px;
+  font-size: 3rem;        /* BIG headline */
+  margin-top: 2rem;
+}
+
+
+.commingsoon-text {
+  font-size: 5rem;        /* VERY BIG */
+  font-weight: 400;
+  letter-spacing: 3px;
+  color: #000;
+  margin-top: 1rem;
+  text-transform: uppercase;
+}
+
+
+/* Optional: subtle animation */
+.construction-img {
+  animation: float 2.5s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+
+
+
+   /* Tutor Response Styling */
+
+.tutor-response {
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 16px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: 0 10px 25px rgba(0,0,0,.06);
+}
+
+.tutor-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 992px) {
+  .tutor-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tutor-grid .tutor-section:first-child {
+    grid-column: 1 / -1; /* Corrected spans full width on large screens */
+  }
+}
+
+.tutor-section {
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(13,110,253,.03);
+}
+
+.tutor-title {
+  margin: 0 0 10px 0;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.tutor-box {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.tutor-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.tutor-list li {
+  margin: 6px 0;
+  line-height: 1.45;
+}
+
+.tutor-ol {
+  padding-left: 22px;
+}
+
+  
+
+
+
+/* Practice HTML file stylings */
+
+
+.option-btn { 
+  width: 100%; text-align: left; 
+}
+
+.pill { 
+  font-size: .85rem; 
+}
+
+.question-box { 
+  border-radius: 14px; 
+}
+
+
+

@@ -79,7 +79,9 @@ function renderWords() {
     // number
     const num = document.createElement("div");
     num.className = "text-muted";
-    num.style.width = "2ch";
+    num.style.flex = "0 0 3ch";
+    num.style.whiteSpace = "nowrap";
+    num.style.textAlign = "right";
     num.textContent = (idx + 1) + ".";
     row.appendChild(num);
 
@@ -116,6 +118,8 @@ const MAX_CHARS = 180;
 let currentAudio = null;
 let currentRow = null;
 let currentBtn = null;
+let currentPlayback = null;
+let playbackId = 0;
 const audioCache = new Map();
 
 function normalizeKey(s) {
@@ -143,14 +147,21 @@ function setPlayingUI(row, btn, isPlaying) {
 }
 
 function stopCurrent() {
+  // Invalidate a pending TTS request as well as audio that is already playing.
+  playbackId++;
   if (currentAudio) {
     currentAudio.pause();
     currentAudio.currentTime = 0;
     currentAudio = null;
   }
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
   setPlayingUI(currentRow, currentBtn, false);
   currentRow = null;
   currentBtn = null;
+
+  // Pausing an Audio element does not fire "ended". Resolve its promise so a
+  // Play all loop can stop immediately instead of getting stuck on that word.
+  currentPlayback?.finish();
 }
 
 function chunkText(text, maxLen = MAX_CHARS) {
@@ -228,14 +239,18 @@ function playSequentially(parts, row, btn, onDone) {
   playNext();
 }
 
-function tryWebSpeechFallback(text) {
-  if (!("speechSynthesis" in window)) return;
+function speakWithBrowser(text) {
+  if (!("speechSynthesis" in window)) return Promise.resolve();
+
   const utter = new SpeechSynthesisUtterance(text);
   const fr = speechSynthesis.getVoices().find(v => /fr(-|_|$)/i.test(v.lang));
   if (fr) utter.voice = fr;
   utter.lang = (fr && fr.lang) || "fr-FR";
-  speechSynthesis.cancel();
-  speechSynthesis.speak(utter);
+  return new Promise(resolve => {
+    utter.onend = resolve;
+    utter.onerror = resolve;
+    speechSynthesis.speak(utter);
+  });
 }
 
 /**
@@ -246,27 +261,47 @@ async function playFrench(text, row, btn, opts = {}) {
   const shouldDebounce = opts.debounce !== false;
   if (shouldDebounce && debounceTap()) return;
 
-  try {
-    stopCurrent();
+  stopCurrent();
+  const thisPlaybackId = ++playbackId;
 
+  try {
     currentRow = row;
     currentBtn = btn;
     setPlayingUI(currentRow, currentBtn, true);
 
     const audioURL = await getAudioURLFor(text);
+    if (thisPlaybackId !== playbackId) return;
 
     if (typeof audioURL === "string") {
       const audio = new Audio(audioURL);
       currentAudio = audio;
 
       return await new Promise((resolve) => {
-        audio.onended = () => { stopCurrent(); resolve(); };
-        audio.onerror = () => {
-          stopCurrent();
-          tryWebSpeechFallback(text);
+        let finished = false;
+        const finish = () => {
+          if (finished) return;
+          finished = true;
+          if (currentPlayback?.finish === finish) currentPlayback = null;
+          if (currentAudio === audio) currentAudio = null;
+          setPlayingUI(row, btn, false);
+          if (currentRow === row) {
+            currentRow = null;
+            currentBtn = null;
+          }
           resolve();
         };
-        audio.play().catch(() => { stopCurrent(); resolve(); });
+        currentPlayback = { finish };
+        audio.onended = finish;
+        audio.onerror = () => {
+          if (thisPlaybackId !== playbackId) return finish();
+          currentAudio = null;
+          speakWithBrowser(text).then(finish);
+        };
+        audio.play().catch(() => {
+          if (thisPlaybackId !== playbackId) return finish();
+          currentAudio = null;
+          speakWithBrowser(text).then(finish);
+        });
       });
     }
 
@@ -276,17 +311,25 @@ async function playFrench(text, row, btn, opts = {}) {
       });
     }
 
-    stopCurrent();
-    tryWebSpeechFallback(text);
+    await speakWithBrowser(text);
   } catch (err) {
     console.warn("TTS error:", err);
-    stopCurrent();
-    tryWebSpeechFallback(text);
+    if (thisPlaybackId === playbackId) await speakWithBrowser(text);
+  } finally {
+    if (thisPlaybackId === playbackId) {
+      setPlayingUI(row, btn, false);
+      if (currentRow === row) {
+        currentRow = null;
+        currentBtn = null;
+      }
+    }
   }
 }
 
 // ----- Play All / Stop wiring -----
 async function playAllInCurrentSection() {
+  // A second click starts a fresh sequence rather than overlapping two lists.
+  stopAll();
   stopAllRequested = false;
 
   const pairs = DATA[currentSet][currentSection];
@@ -303,6 +346,7 @@ async function playAllInCurrentSection() {
     await playFrench(fr, row, btn, { debounce: false });
   }
 
+  if (!stopAllRequested) stopCurrent();
   stopAllRequested = false;
 }
 

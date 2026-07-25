@@ -7,6 +7,9 @@
 
     const btnStart = document.getElementById("btnStart");
     const questionCountEl = document.getElementById("questionCount");
+    const setPicker = document.getElementById("setPicker");
+    const btnSelectAllSets = document.getElementById("btnSelectAllSets");
+    const btnClearSets = document.getElementById("btnClearSets");
 
     const quizArea = document.getElementById("quizArea");
     const resultArea = document.getElementById("resultArea");
@@ -34,10 +37,10 @@
       return a;
     }
 
-    function flattenData(DATA) {
+    function flattenData(DATA, selectedSets = Object.keys(DATA || {})) {
       // DATA: { setName: { sectionName: [ [fr,en], ... ] } }
       const items = [];
-      for (const setName of Object.keys(DATA || {})) {
+      for (const setName of selectedSets) {
         const sections = DATA[setName] || {};
         for (const sectionName of Object.keys(sections)) {
           const pairs = sections[sectionName] || [];
@@ -49,6 +52,43 @@
         }
       }
       return items;
+    }
+
+    function renderSetPicker() {
+      if (!window.DATA) return;
+
+      const setNames = Object.keys(window.DATA);
+      const savedSets = JSON.parse(localStorage.getItem("practiceSelectedSets") || "[]");
+      const selectedSets = savedSets.length ? savedSets : setNames;
+
+      setPicker.innerHTML = "";
+      setNames.forEach(setName => {
+        const id = `practice-set-${setName.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`;
+        const wrapper = document.createElement("div");
+        wrapper.className = "form-check practice-set-option";
+        wrapper.innerHTML = `
+          <input class="form-check-input practice-set-input" type="checkbox" value="${setName}" id="${id}">
+          <label class="form-check-label" for="${id}">${setName}</label>`;
+        const input = wrapper.querySelector("input");
+        input.checked = selectedSets.includes(setName);
+        input.addEventListener("change", saveSelectedSets);
+        setPicker.appendChild(wrapper);
+      });
+    }
+
+    function getSelectedSets() {
+      return Array.from(document.querySelectorAll(".practice-set-input:checked"), input => input.value);
+    }
+
+    function saveSelectedSets() {
+      localStorage.setItem("practiceSelectedSets", JSON.stringify(getSelectedSets()));
+    }
+
+    function setAllSets(checked) {
+      document.querySelectorAll(".practice-set-input").forEach(input => {
+        input.checked = checked;
+      });
+      saveSelectedSets();
     }
 
     function sampleWrongOptions(allItems, correctEn, count = 2) {
@@ -99,7 +139,7 @@
           const isCorrect = opt === q.en;
           if (isCorrect) score++;
 
-          // color feedback
+          // Show the correct answer and the selected incorrect answer.
           for (const child of optionsEl.querySelectorAll("button")) {
             child.disabled = true;
             if (child.textContent === q.en) {
@@ -133,7 +173,13 @@
         return;
       }
 
-      allItems = flattenData(window.DATA);
+      const selectedSets = getSelectedSets();
+      if (!selectedSets.length) {
+        alert("Select at least one vocabulary set to start the quiz.");
+        return;
+      }
+
+      allItems = flattenData(window.DATA, selectedSets);
       if (allItems.length < 3) {
         alert("Not enough words to start quiz.");
         return;
@@ -176,6 +222,10 @@
     btnReplay.addEventListener("click", replay);
     btnReplayTop.addEventListener("click", replay);
     btnStop.addEventListener("click", stopQuiz);
+    btnSelectAllSets.addEventListener("click", () => setAllSets(true));
+    btnClearSets.addEventListener("click", () => setAllSets(false));
+
+    renderSetPicker();
 
 
 

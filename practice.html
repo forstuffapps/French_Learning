@@ -47,13 +47,22 @@
 
   <div class="container mb-4">
     <div class="row g-4">
-      <div class="col-lg-8">
+      <div class="col-12 text-center">
         <h1 class="display-6 fw-bold">Practice Quiz</h1>
         <p class="lead mb-0">Pick the correct English meaning for each French word. 3 options per question.</p>
       </div>
-      <div class="col-lg-4">
+      <div class="col-md-8 col-lg-6 mx-auto">
         <div class="card shadow-sm">
           <div class="card-body">
+            <fieldset class="mb-3">
+              <legend class="fs-6 mb-2">Vocabulary sets</legend>
+              <p class="small text-muted mb-2">Choose one or more sets to include in this quiz.</p>
+              <div id="setPicker" class="d-flex flex-wrap gap-2" aria-label="Vocabulary sets"></div>
+              <div class="mt-2 d-flex gap-2">
+                <button id="btnSelectAllSets" class="btn btn-sm btn-outline-secondary" type="button">Select all</button>
+                <button id="btnClearSets" class="btn btn-sm btn-outline-secondary" type="button">Clear</button>
+              </div>
+            </fieldset>
             <div class="d-flex justify-content-between mb-2">
               <span class="text-muted">Questions</span>
               <select id="questionCount" class="form-select form-select-sm" style="max-width: 110px;">

@@ -77,7 +77,13 @@ header a img, footer a img{
 
 .set-btn:hover,
 .section-btn:hover{
-  filter: brightness(0.95);
+  border-color: #212529;
+  background: #f8f9fa;
+}
+
+.set-btn,
+.section-btn {
+  transition: border-color .15s ease, background-color .15s ease;
 }
 
 .set-btn.active{
@@ -90,6 +96,22 @@ header a img, footer a img{
   background: #D83A2F ;
   color: #fff ;
   border-color: #D83A2F ;
+}
+
+.set-btn:focus-visible,
+.section-btn:focus-visible {
+  border-color: #000 !important;
+  outline: 2px solid #000;
+  outline-offset: 1px;
+  box-shadow: none !important;
+}
+
+.set-btn:focus,
+.section-btn:focus,
+.set-btn:active,
+.section-btn:active {
+  border-color: #000 !important;
+  box-shadow: none !important;
 }
 
 
@@ -227,6 +249,29 @@ header a img, footer a img{
 
 .question-box { 
   border-radius: 14px; 
+}
+
+.practice-set-option {
+  margin: 0;
+  padding: .35rem .6rem .35rem 1.9rem;
+  border: 1px solid #dee2e6;
+  border-radius: .5rem;
+  background: #fff;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.practice-set-option:hover {
+  border-color: #212529;
+  box-shadow: 0 0 0 .15rem rgba(33, 37, 41, .1);
+}
+
+.practice-set-option label,
+.practice-set-option input {
+  cursor: pointer;
+}
+
+.practice-set-option:has(.form-check-input:checked) {
+  border-color: #212529;
 }
 
 

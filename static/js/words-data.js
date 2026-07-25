@@ -44,7 +44,7 @@ window.DATA = {
         "but"
       ]
     ],
-    "French Numbers 1–10": [
+    "French Numbers": [
       [
         "Un",
         "one"
@@ -84,7 +84,15 @@ window.DATA = {
       [
         "Dix",
         "ten"
-      ]
+      ],
+      ["Zéro", "zero"], ["Onze", "eleven"], ["Douze", "twelve"],
+      ["Treize", "thirteen"], ["Quatorze", "fourteen"], ["Quinze", "fifteen"],
+      ["Seize", "sixteen"], ["Dix-sept", "seventeen"], ["Dix-huit", "eighteen"],
+      ["Dix-neuf", "nineteen"], ["Vingt", "twenty"], ["Trente", "thirty"],
+      ["Quarante", "forty"], ["Cinquante", "fifty"], ["Soixante", "sixty"],
+      ["Soixante-dix", "seventy"], ["Quatre-vingts", "eighty"],
+      ["Quatre-vingt-dix", "ninety"], ["Cent", "one hundred"],
+      ["Mille", "one thousand"]
     ],
     "Greetings and Polite Words": [
       [
@@ -118,7 +126,11 @@ window.DATA = {
       [
         "S’il vous plaît / S’il te plaît",
         "please (formal / informal)"
-      ]
+      ],
+      ["Merci beaucoup", "thank you very much"], ["Excusez-moi", "excuse me"],
+      ["Pardon", "sorry / pardon me"], ["Je ne comprends pas", "I do not understand"],
+      ["Pouvez-vous répéter ?", "can you repeat that?"],
+      ["Je suis désolé / Je suis désolée", "I am sorry"], ["À bientôt", "see you soon"]
     ]
   },
   "Set 2": {
@@ -190,7 +202,8 @@ window.DATA = {
       [
         "Ils / Elles",
         "they"
-      ]
+      ],
+      ["Me", "me"], ["Ce / Cela / Ça", "this / that / it"]
     ]
   },
   "Set 3": {
@@ -298,7 +311,8 @@ window.DATA = {
       [
         "Parce que",
         "because"
-      ]
+      ],
+      ["Donc", "so / therefore"]
     ]
   },
   "Set 4": {
@@ -350,7 +364,8 @@ window.DATA = {
       [
         "Avant / Après",
         "before / after"
-      ]
+      ],
+      ["Sous", "under"], ["Pendant", "during"]
     ],
     "Useful Adverbs": [
       [
@@ -482,7 +497,13 @@ window.DATA = {
       [
         "Triste",
         "sad"
-      ]
+      ],
+      ["Nouveau / Nouvelle", "new"], ["Fatigué / Fatiguée", "tired"],
+      ["Occupé / Occupée", "busy"], ["Facile", "easy"],
+      ["Difficile", "difficult"], ["Intéressant(e)", "interesting"],
+      ["Ennuyeux / Ennuyeuse", "boring"]
+      , ["Intelligent / Intelligente", "smart"], ["Fâché / Fâchée", "angry"],
+      ["Drôle", "funny"], ["Nerveux / Nerveuse", "nervous"], ["Fort / Forte", "strong"]
     ],
     "Colors": [
       [
@@ -538,7 +559,9 @@ window.DATA = {
       [
         "Est-ce que",
         "question starter"
-      ]
+      ],
+      ["Que ?", "what?"], ["Comment ?", "how?"],
+      ["Combien ?", "how much / how many?"], ["Lequel / Laquelle ?", "which one?"]
     ]
   },
   "Set 6": {
@@ -578,7 +601,9 @@ window.DATA = {
       [
         "Demain",
         "tomorrow"
-      ]
+      ],
+      ["Maintenant", "now"], ["Bientôt", "soon"], ["Toujours", "always"],
+      ["Jamais", "never"], ["Parfois", "sometimes"]
     ],
     "French Days of the Week": [
       [
@@ -625,7 +650,7 @@ window.DATA = {
       ],
       [
         "Le fromage",
-        "milk"
+        "cheese"
       ],
       [
         "Le poulet",
@@ -658,11 +683,16 @@ window.DATA = {
       [
         "Le café",
         "coffee"
-      ]
+      ],
+      ["Le vin", "wine"], ["Le thé", "tea"], ["Le poisson", "fish"],
+      ["Les légumes", "vegetables"], ["Les fruits", "fruit"], ["Le déjeuner", "lunch"],
+      ["Le dîner", "dinner"], ["Le petit-déjeuner", "breakfast"], ["L’addition", "the bill"]
+      , ["Le restaurant", "restaurant"], ["L’orange", "orange"], ["La carotte", "carrot"],
+      ["La tomate", "tomato"]
     ]
   },
   "Set 7": {
-    "French Words for Places": [
+    "French Words for Places and Directions": [
       [
         "Le pays",
         "country"
@@ -706,7 +736,16 @@ window.DATA = {
       [
         "La bibliothèque",
         "library"
-      ]
+      ],
+      ["À gauche", "to the left"], ["À droite", "to the right"],
+      ["Tout droit", "straight ahead"], ["Près de", "near / close to"],
+      ["Loin de", "far from"], ["En face de", "opposite / across from"],
+      ["La rue", "street"], ["L’avenue", "avenue"], ["La place", "square"],
+      ["La gare", "train station"], ["L’aéroport", "airport"], ["L’hôtel", "hotel"],
+      ["Le marché", "market"], ["La pharmacie", "pharmacy"], ["L’hôpital", "hospital"]
+      , ["Le centre-ville", "city center"], ["La campagne", "countryside"],
+      ["Le quartier", "neighborhood"], ["Le musée", "museum"], ["Le parc", "park"],
+      ["Le magasin", "store"], ["L’université", "university"]
     ],
     "French Clothing Words": [
       [
@@ -741,6 +780,77 @@ window.DATA = {
         "Les chaussettes",
         "socks"
       ]
+    ]
+  },
+  "Set 8": {
+    "Common French Verbs (infinitives)": [
+      ["Être", "to be"],
+      ["Avoir", "to have"],
+      ["Faire", "to do / make"],
+      ["Aller", "to go"],
+      ["Venir", "to come"],
+      ["Voir", "to see"],
+      ["Savoir", "to know (a fact)"],
+      ["Connaître", "to know (a person or place)"],
+      ["Pouvoir", "to be able to / can"],
+      ["Vouloir", "to want"],
+      ["Devoir", "to have to / must"],
+      ["Dire", "to say"],
+      ["Prendre", "to take"],
+      ["Parler", "to speak"],
+      ["Manger", "to eat"],
+      ["Boire", "to drink"]
+    ],
+    "Common -ER Verbs": [
+      ["Aimer", "to like"], ["Demander", "to ask"], ["Étudier", "to study"],
+      ["Regarder", "to watch"], ["Visiter", "to visit (a place)"],
+      ["Habiter", "to live"], ["Penser", "to think"]
+    ],
+    "Common -IR and -RE Verbs": [
+      ["Finir", "to finish"], ["Choisir", "to choose"], ["Grandir", "to grow"],
+      ["Grossir", "to gain weight"], ["Réussir", "to succeed / pass a test"],
+      ["Vendre", "to sell"], ["Attendre", "to wait"], ["Entendre", "to hear"],
+      ["Perdre", "to lose"], ["Répondre", "to respond"]
+    ]
+  },
+  "Set 9": {
+    "French Words for People": [
+      ["L’homme", "man"], ["La femme", "woman"], ["La fille", "girl"], ["Le garçon", "boy"],
+      ["La personne", "person"], ["L’ami / L’amie", "friend"],
+      ["Le collègue / La collègue", "colleague"], ["Le voisin / La voisine", "neighbor"]
+    ],
+    "French Profession Words": [
+      ["Le dentiste", "dentist"], ["Le médecin", "doctor"],
+      ["Le serveur / La serveuse", "waiter / waitress"], ["L’avocat / L’avocate", "lawyer"],
+      ["Le caissier / La caissière", "cashier"], ["L’ingénieur / L’ingénieure", "engineer"],
+      ["Le plombier / La plombière", "plumber"], ["Le policier / La policière", "police officer"],
+      ["L’ouvrier / L’ouvrière", "worker"]
+    ],
+    "French House and Furniture Words": [
+      ["La pièce", "room"], ["La cuisine", "kitchen"], ["La salle à manger", "dining room"],
+      ["Le salon", "living room"], ["La chambre", "bedroom"], ["La salle de bain", "bathroom"],
+      ["Les toilettes", "toilet / restroom"], ["La porte", "door"], ["La fenêtre", "window"],
+      ["L’escalier", "stairs"], ["Le mur", "wall"], ["Le sol", "floor"],
+      ["La télévision", "television"], ["Le canapé", "couch / sofa"], ["La chaise", "chair"],
+      ["La lampe", "lamp"], ["Le réfrigérateur", "refrigerator"], ["Le four", "oven"],
+      ["La table", "table"], ["Le lit", "bed"], ["La douche", "shower"]
+    ]
+  },
+  "Set 10": {
+    "French Transport Words": [
+      ["La voiture", "car"], ["Le bus", "bus"], ["Le train", "train"], ["Le métro", "subway"],
+      ["Le taxi", "taxi"], ["La moto", "motorcycle"], ["Le vélo", "bicycle"],
+      ["L’avion", "airplane"], ["Le bateau", "boat"], ["Le navire", "ship"]
+    ],
+    "French Animals and Nature Words": [
+      ["Le chien", "dog"], ["Le chat", "cat"], ["Le lapin", "rabbit"], ["Le cheval", "horse"],
+      ["L’oiseau", "bird"], ["Le soleil", "sun"], ["La pluie", "rain"], ["Le vent", "wind"],
+      ["La neige", "snow"], ["Le nuage", "cloud"], ["La montagne", "mountain"],
+      ["La plage", "beach"], ["L’océan", "ocean"]
+    ],
+    "French Weather Words": [
+      ["La météo", "weather forecast"], ["Quel temps fait-il ?", "what is the weather like?"],
+      ["Il fait chaud", "it is hot"], ["Il fait froid", "it is cold"]
     ]
   }
 };

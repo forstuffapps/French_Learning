@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>French Learning — Speaking Quiz</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+      <a href="./index.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+        <img src="static/images/French_Logo.jpg" alt="French Learning">
+      </a>
+      <ul class="nav nav-pills">
+        <li class="nav-item"><a href="./index.html" class="nav-link text-body-secondary">Home</a></li>
+        <li class="nav-item"><a href="./words.html" class="nav-link text-body-secondary">Words</a></li>
+        <li class="nav-item"><a href="./tutor.html" class="nav-link text-body-secondary">Tutor</a></li>
+        <li class="nav-item"><a href="./practice.html" class="nav-link text-body-secondary">Practice</a></li>
+        <li class="nav-item"><a href="./speaking.html" class="nav-link active bg-dark" aria-current="page">Speaking</a></li>
+      </ul>
+    </header>
+  </div>
+
+  <main class="container mb-5">
+    <div class="text-center mb-4">
+      <h1 class="display-6 fw-bold">Speaking Quiz</h1>
+      <p class="lead mb-0">See the French word, say it aloud, then hear the correct pronunciation.</p>
+    </div>
+
+    <div id="unsupportedMessage" class="alert alert-warning d-none" role="alert">
+      Speaking recognition is not available in this browser. Please use the latest Chrome or Edge.
+    </div>
+
+    <section id="setupArea" class="row mb-4">
+      <div class="col-md-8 col-lg-6 mx-auto">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <fieldset class="mb-3">
+              <legend class="fs-6 mb-2">Vocabulary sets</legend>
+              <p class="small text-muted mb-2">Choose one or more sets for this quiz.</p>
+              <div id="setPicker" class="d-flex flex-wrap gap-2"></div>
+              <div class="mt-2 d-flex gap-2">
+                <button id="btnSelectAllSets" class="btn btn-sm btn-outline-secondary" type="button">Select all</button>
+                <button id="btnClearSets" class="btn btn-sm btn-outline-secondary" type="button">Clear</button>
+              </div>
+            </fieldset>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <label for="questionCount" class="text-muted">Questions</label>
+              <select id="questionCount" class="form-select form-select-sm" style="max-width: 110px;">
+                <option value="5">5</option><option value="10" selected>10</option><option value="15">15</option><option value="20">20</option>
+              </select>
+            </div>
+            <button id="btnStart" class="btn btn-dark w-100" type="button">Start Speaking Quiz</button>
+            <p id="configHint" class="small text-muted text-center mb-0 mt-2">You can change these settings and restart the quiz at any time.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="quizArea" class="card shadow-sm speaking-quiz d-none">
+      <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <div>
+          <span id="progressPill" class="badge bg-secondary pill">Q 1/10</span>
+          <span id="scorePill" class="badge bg-primary pill ms-2">Score: 0</span>
+        </div>
+        <button id="btnStop" class="btn btn-sm btn-outline-danger" type="button">Stop Quiz</button>
+      </div>
+      <div class="card-body text-center py-5">
+        <p id="metaText" class="text-muted mb-2"></p>
+        <h2 id="questionText" class="display-4 fw-bold mb-4"></h2>
+        <p id="statusText" class="text-muted mb-3" aria-live="polite">Press the button and say the word.</p>
+        <button id="btnSpeak" class="btn btn-danger btn-lg px-4" type="button">Hold to speak</button>
+        <div id="listeningAnimation" class="speaking-animation d-none" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div id="feedbackArea" class="mt-4 d-none" aria-live="polite">
+          <div id="feedbackText" class="fw-semibold mb-2"></div>
+          <p id="heardText" class="text-muted mb-3"></p>
+          <button id="btnHearCorrect" class="btn btn-outline-primary me-2" type="button">Hear correct pronunciation</button>
+          <button id="btnNext" class="btn btn-primary" type="button">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultArea" class="card shadow-sm d-none">
+      <div class="card-body text-center">
+        <h2 class="fw-bold mb-2">Speaking Quiz Complete</h2>
+        <div id="finalScore" class="display-6 mb-3">0 / 0</div>
+        <button id="btnReplay" class="btn btn-dark" type="button">Start another quiz</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="container"><footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top"><p class="col-md-4 mb-0 text-body-secondary">© 2025 French Learning Website</p><p class="col-md-4 mb-0 text-body-secondary">Designed and Developed by Vishal Reddy</p></footer></div>
+  <script src="static/js/words-data.js"></script>
+  <script src="static/js/speaking.js"></script>
+</body>
+</html>

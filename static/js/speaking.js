@@ -15,17 +15,7 @@ const btnSpeak = document.getElementById("btnSpeak");
 const feedbackArea = document.getElementById("feedbackArea");
 const feedbackText = document.getElementById("feedbackText");
 const heardText = document.getElementById("heardText");
-
-let questions = [];
-let qIndex = 0;
-let score = 0;
-let recognition = null;
-let isListening = false;
-let microphoneStream = null;
-let isAcceptingAnswer = false;
-let isHoldingSpeakButton = false;
-let releaseTimer = null;
-let recognizedTranscript = "";
+const listeningAnimation = document.getElementById("listeningAnimation");
 
 const FRENCH_NUMBERS = {
   0: "zero", 1: "un", 2: "deux", 3: "trois", 4: "quatre", 5: "cinq",
@@ -37,13 +27,16 @@ const FRENCH_NUMBERS = {
   100: "cent", 1000: "mille"
 };
 
-function normalizeForComparison(text) {
-  return text.toLocaleLowerCase("fr-FR")
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/\d+/g, number => FRENCH_NUMBERS[number] || number)
-    .replace(/[\u2019']/g, " ").replace(/-/g, " ")
-    .replace(/[^a-z\s]/g, " ").replace(/\s+/g, " ").trim();
-}
+let questions = [];
+let qIndex = 0;
+let score = 0;
+let recognition = null;
+let isRecognitionRunning = false;
+let isCapturing = false;
+let isAwaitingResult = false;
+let capturedTranscript = "";
+let releaseTimer = null;
+let quizActive = false;
 
 function shuffle(items) {
   const result = items.slice();
@@ -57,18 +50,36 @@ function shuffle(items) {
 function normalize(text) {
   return text.toLocaleLowerCase("fr-FR")
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[’']/g, " ").replace(/[^a-z\s-]/g, " ")
-    .replace(/\s+/g, " ").trim();
+    .replace(/\d+/g, number => FRENCH_NUMBERS[number] || number)
+    .replace(/[\u2019']/g, " ").replace(/-/g, " ")
+    .replace(/[^a-z\s]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function matchesTarget(spoken, target) {
+  const spokenValue = normalize(spoken);
+  return target.split(/\s*\/\s*/).some(option => normalize(option) === spokenValue);
 }
 
 function flattenData(selectedSets) {
   const items = [];
   selectedSets.forEach(setName => {
     Object.entries(window.DATA[setName] || {}).forEach(([sectionName, pairs]) => {
-      pairs.forEach(([fr, en]) => items.push({ fr, en, setName, sectionName }));
+      pairs.forEach(([fr, en]) => {
+        // Skip vocabulary entries with damaged source characters. They cannot be
+        // shown, spoken, or matched reliably until the source data is repaired.
+        if (!fr.includes("\uFFFD")) items.push({ fr, en, setName, sectionName });
+      });
     });
   });
   return items;
+}
+
+function getSelectedSets() {
+  return Array.from(document.querySelectorAll(".speaking-set-input:checked"), input => input.value);
+}
+
+function saveSelectedSets() {
+  localStorage.setItem("speakingSelectedSets", JSON.stringify(getSelectedSets()));
 }
 
 function renderSetPicker() {
@@ -88,19 +99,15 @@ function renderSetPicker() {
   });
 }
 
-function getSelectedSets() {
-  return Array.from(document.querySelectorAll(".speaking-set-input:checked"), input => input.value);
-}
-
-function saveSelectedSets() {
-  localStorage.setItem("speakingSelectedSets", JSON.stringify(getSelectedSets()));
+function setListening(value) {
+  listeningAnimation.classList.toggle("d-none", !value);
 }
 
 function speakCorrectAnswer() {
   const target = questions[qIndex]?.fr;
   if (!target || !("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(target);
+  const utterance = new SpeechSynthesisUtterance(target.split(/\s*\/\s*/)[0]);
   utterance.lang = "fr-FR";
   utterance.rate = 0.85;
   window.speechSynthesis.speak(utterance);
@@ -112,102 +119,140 @@ function renderQuestion() {
   scorePill.textContent = `Score: ${score}`;
   questionText.textContent = question.fr;
   metaText.textContent = `${question.setName} • ${question.sectionName}`;
-  statusText.textContent = "Press the button and say the word.";
+  statusText.textContent = "Hold the button while you say the word.";
   btnSpeak.disabled = false;
   btnSpeak.textContent = "Hold to speak";
   feedbackArea.classList.add("d-none");
-  recognizedTranscript = "";
-  document.getElementById("listeningAnimation").classList.add("d-none");
+  isCapturing = false;
+  isAwaitingResult = false;
+  capturedTranscript = "";
+  clearTimeout(releaseTimer);
+  setListening(false);
 }
 
-function showFeedback(transcript) {
-  const question = questions[qIndex];
-  const correct = normalizeForComparison(transcript) === normalizeForComparison(question.fr);
+function showFeedback(spokenText) {
+  const correct = matchesTarget(spokenText, questions[qIndex].fr);
   if (correct) score++;
   scorePill.textContent = `Score: ${score}`;
   feedbackText.textContent = correct ? "Correct — well done!" : "Not quite. Try to say the word shown.";
   feedbackText.className = `fw-semibold mb-2 ${correct ? "text-success" : "text-danger"}`;
-  heardText.textContent = transcript ? `We heard: “${transcript}”` : "We could not hear a word.";
+  heardText.textContent = `We heard: “${spokenText}”`;
   statusText.textContent = "The correct pronunciation is now playing.";
   feedbackArea.classList.remove("d-none");
   btnSpeak.disabled = true;
-  isAcceptingAnswer = false;
-  isHoldingSpeakButton = false;
+  isCapturing = false;
+  isAwaitingResult = false;
   clearTimeout(releaseTimer);
+  setListening(false);
   speakCorrectAnswer();
 }
 
-function initialiseRecognition() {
-  recognition = new SpeechRecognition();
-  recognition.lang = "fr-FR";
-  recognition.continuous = true;
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-  recognition.onstart = () => {
-    isListening = true;
-    if (isAcceptingAnswer) {
-      btnSpeak.textContent = "Listening…";
-      statusText.textContent = "Say the word clearly, then wait a moment.";
-      document.getElementById("listeningAnimation").classList.remove("d-none");
-    }
-  };
-  recognition.onresult = event => {
-    if (!isAcceptingAnswer) return;
-    const result = event.results[event.results.length - 1][0];
-    recognizedTranscript = result.transcript;
-    if (!isHoldingSpeakButton) {
-      clearTimeout(releaseTimer);
-      showFeedback(recognizedTranscript);
-    }
-  };
-  recognition.onerror = event => {
-    isAcceptingAnswer = false;
-    isHoldingSpeakButton = false;
-    document.getElementById("listeningAnimation").classList.add("d-none");
-    if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-      statusText.textContent = "Microphone access was blocked. Allow it in your browser settings and try again.";
-    } else if (event.error === "no-speech") {
-      statusText.textContent = "No speech was detected. Please try again.";
-    } else {
-      statusText.textContent = "Speech recognition could not complete. Please try again.";
-    }
-    btnSpeak.disabled = false;
-    btnSpeak.textContent = "Try again";
-  };
-  recognition.onend = () => {
-    isListening = false;
-    document.getElementById("listeningAnimation").classList.add("d-none");
-    if (isAcceptingAnswer) {
-      isAcceptingAnswer = false;
-      statusText.textContent = "Speech recognition stopped. Press the button to try again.";
+function describeError(error) {
+  if (error === "not-allowed" || error === "service-not-allowed") return "Microphone access was blocked. Allow it in browser settings and try again.";
+  if (error === "no-speech") return "No speech was detected. Hold the button and try again.";
+  if (error === "network") return "Speech recognition needs an internet connection. Please check yours and try again.";
+  return "Speech recognition could not complete. Please try again.";
+}
+
+function startRecognitionSession() {
+  if (isRecognitionRunning || !quizActive) return;
+  if (!recognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = "fr-FR";
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => { isRecognitionRunning = true; };
+    recognition.onresult = resultEvent => {
+      if (!isCapturing && !isAwaitingResult) return;
+      capturedTranscript = resultEvent.results[resultEvent.results.length - 1][0].transcript;
+      if (isAwaitingResult) {
+        isAwaitingResult = false;
+        clearTimeout(releaseTimer);
+        showFeedback(capturedTranscript);
+      }
+    };
+    recognition.onerror = errorEvent => {
+      if (errorEvent.error === "aborted") return;
+      isRecognitionRunning = false;
+      if (isCapturing || isAwaitingResult) {
+        isCapturing = false;
+        isAwaitingResult = false;
+        clearTimeout(releaseTimer);
+        setListening(false);
+        statusText.textContent = describeError(errorEvent.error);
+        btnSpeak.disabled = false;
+        btnSpeak.textContent = "Hold to speak";
+      }
+    };
+    recognition.onend = () => {
+      isRecognitionRunning = false;
+      if (quizActive) window.setTimeout(startRecognitionSession, 150);
+    };
+  }
+  try { recognition.start(); } catch { /* session is still closing; onend will retry */ }
+}
+
+function beginSpeaking(event) {
+  if (event.button !== undefined && event.button !== 0) return;
+  if (btnSpeak.disabled) return;
+  event.preventDefault();
+  startRecognitionSession();
+  isCapturing = true;
+  isAwaitingResult = false;
+  capturedTranscript = "";
+  clearTimeout(releaseTimer);
+  btnSpeak.textContent = "Listening… release when finished";
+  statusText.textContent = "Keep holding the button while you say the word.";
+  setListening(true);
+  btnSpeak.setPointerCapture?.(event.pointerId);
+}
+
+function stopSpeaking(event) {
+  if (!isCapturing) return;
+  event.preventDefault();
+  isCapturing = false;
+  isAwaitingResult = true;
+  btnSpeak.releasePointerCapture?.(event.pointerId);
+  btnSpeak.textContent = "Checking…";
+  statusText.textContent = "Checking what we heard…";
+  setListening(false);
+  if (capturedTranscript) {
+    isAwaitingResult = false;
+    return showFeedback(capturedTranscript);
+  }
+  releaseTimer = window.setTimeout(() => {
+    if (!isAwaitingResult) return;
+    isAwaitingResult = false;
+    if (capturedTranscript) showFeedback(capturedTranscript);
+    else {
+      statusText.textContent = "No speech was detected. Hold the button and try again.";
       btnSpeak.disabled = false;
       btnSpeak.textContent = "Hold to speak";
     }
-  };
+  }, 1000);
 }
 
-function keepRecognitionReady() {
-  if (isListening) return;
-  try {
-    recognition.start();
-  } catch (error) {
-    // A recognition session can take a moment to close after a quiz ends.
-  }
+function cancelSpeaking(event) {
+  if (!isCapturing) return;
+  event.preventDefault();
+  isCapturing = false;
+  isAwaitingResult = false;
+  capturedTranscript = "";
+  clearTimeout(releaseTimer);
+  setListening(false);
+  statusText.textContent = "Hold the button while you say the word.";
+  btnSpeak.textContent = "Hold to speak";
 }
 
-async function startQuiz() {
+function startQuiz() {
   const selectedSets = getSelectedSets();
-  const items = flattenData(selectedSets);
   if (!selectedSets.length) return alert("Select at least one vocabulary set.");
+  const items = flattenData(selectedSets);
   if (!items.length) return alert("There are no words in the selected sets.");
-  if (!microphoneStream) {
-    try {
-      microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (error) {
-      alert("Microphone access is required for the Speaking Quiz. Please allow it and try again.");
-      return;
-    }
-  }
+  quizActive = true;
+  startRecognitionSession();
+  window.speechSynthesis?.cancel();
   const count = Number.parseInt(questionCountEl.value, 10) || 10;
   questions = shuffle(items).slice(0, Math.min(count, items.length));
   qIndex = 0;
@@ -216,17 +261,18 @@ async function startQuiz() {
   quizArea.classList.remove("d-none");
   document.getElementById("btnStart").textContent = "Restart Speaking Quiz";
   renderQuestion();
-  keepRecognitionReady();
 }
 
 function finishQuiz() {
-  isAcceptingAnswer = false;
-  isHoldingSpeakButton = false;
-  clearTimeout(releaseTimer);
-  if (isListening) recognition.abort();
+  quizActive = false;
+  if (recognition && isRecognitionRunning) recognition.abort();
   window.speechSynthesis?.cancel();
-  microphoneStream?.getTracks().forEach(track => track.stop());
-  microphoneStream = null;
+  recognition = null;
+  isRecognitionRunning = false;
+  isCapturing = false;
+  isAwaitingResult = false;
+  clearTimeout(releaseTimer);
+  setListening(false);
   quizArea.classList.add("d-none");
   resultArea.classList.remove("d-none");
   document.getElementById("finalScore").textContent = `${score} / ${questions.length}`;
@@ -234,49 +280,25 @@ function finishQuiz() {
 
 document.getElementById("btnStart").addEventListener("click", startQuiz);
 document.getElementById("btnSelectAllSets").addEventListener("click", () => {
-  document.querySelectorAll(".speaking-set-input").forEach(input => input.checked = true); saveSelectedSets();
+  document.querySelectorAll(".speaking-set-input").forEach(input => input.checked = true);
+  saveSelectedSets();
 });
 document.getElementById("btnClearSets").addEventListener("click", () => {
-  document.querySelectorAll(".speaking-set-input").forEach(input => input.checked = false); saveSelectedSets();
+  document.querySelectorAll(".speaking-set-input").forEach(input => input.checked = false);
+  saveSelectedSets();
 });
-function beginSpeaking(event) {
-  if (event.button !== undefined && event.button !== 0) return;
-  event.preventDefault();
-  keepRecognitionReady();
-  isAcceptingAnswer = true;
-  isHoldingSpeakButton = true;
-  recognizedTranscript = "";
-  btnSpeak.textContent = "Listening… release when finished";
-  statusText.textContent = "Keep holding the button while you say the word.";
-  document.getElementById("listeningAnimation").classList.remove("d-none");
-  btnSpeak.setPointerCapture?.(event.pointerId);
-}
-
-function finishSpeaking(event) {
-  if (!isHoldingSpeakButton) return;
-  event.preventDefault();
-  isHoldingSpeakButton = false;
-  btnSpeak.releasePointerCapture?.(event.pointerId);
-  document.getElementById("listeningAnimation").classList.add("d-none");
-  btnSpeak.textContent = "Checking…";
-  statusText.textContent = "Checking what we heard…";
-  if (recognizedTranscript) {
-    showFeedback(recognizedTranscript);
-    return;
-  }
-  // Final recognition results can arrive just after the user releases the button.
-  releaseTimer = setTimeout(() => {
-    if (isAcceptingAnswer) showFeedback("");
-  }, 1200);
-}
-
 btnSpeak.addEventListener("pointerdown", beginSpeaking);
-btnSpeak.addEventListener("pointerup", finishSpeaking);
-btnSpeak.addEventListener("pointercancel", finishSpeaking);
+btnSpeak.addEventListener("pointerup", stopSpeaking);
+btnSpeak.addEventListener("pointercancel", cancelSpeaking);
 btnSpeak.addEventListener("contextmenu", event => event.preventDefault());
 document.getElementById("btnHearCorrect").addEventListener("click", speakCorrectAnswer);
 document.getElementById("btnNext").addEventListener("click", () => {
-  if (qIndex < questions.length - 1) { qIndex++; renderQuestion(); } else { finishQuiz(); }
+  if (qIndex < questions.length - 1) {
+    qIndex++;
+    renderQuestion();
+  } else {
+    finishQuiz();
+  }
 });
 document.getElementById("btnStop").addEventListener("click", finishQuiz);
 document.getElementById("btnReplay").addEventListener("click", () => {
@@ -288,6 +310,4 @@ renderSetPicker();
 if (!SpeechRecognition) {
   unsupportedMessage.classList.remove("d-none");
   document.getElementById("btnStart").disabled = true;
-} else {
-  initialiseRecognition();
 }

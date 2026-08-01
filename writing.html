@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>French Learning — Writing Quiz</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+  <div class="container"><header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+    <a href="./index.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none"><img src="static/images/French_Logo.jpg" alt="French Learning"></a>
+    <ul class="nav nav-pills">
+      <li class="nav-item"><a href="./index.html" class="nav-link text-body-secondary">Home</a></li>
+      <li class="nav-item"><a href="./words.html" class="nav-link text-body-secondary">Words</a></li>
+      <li class="nav-item"><a href="./tutor.html" class="nav-link text-body-secondary">Tutor</a></li>
+      <li class="nav-item"><a href="./practice.html" class="nav-link text-body-secondary">Practice</a></li>
+      <li class="nav-item"><a href="./speaking.html" class="nav-link text-body-secondary">Speaking</a></li>
+      <li class="nav-item"><a href="./writing.html" class="nav-link active bg-dark" aria-current="page">Writing</a></li>
+    </ul>
+  </header></div>
+
+  <main class="container mb-5">
+    <section id="setupArea" class="row g-4">
+      <div class="col-12 text-center"><h1 class="display-6 fw-bold">Writing Quiz</h1><p class="lead mb-0">See the English word and type the French translation.</p></div>
+      <div class="col-md-8 col-lg-6 mx-auto"><div class="card shadow-sm"><div class="card-body">
+        <fieldset class="mb-3"><legend class="fs-6 mb-2">Vocabulary sets</legend><p class="small text-muted mb-2">Choose one or more sets to include.</p><div id="setPicker" class="d-flex flex-wrap gap-2"></div><div class="mt-2 d-flex gap-2"><button id="btnSelectAllSets" class="btn btn-sm btn-outline-secondary" type="button">Select all</button><button id="btnClearSets" class="btn btn-sm btn-outline-secondary" type="button">Clear</button></div></fieldset>
+        <div class="d-flex justify-content-between align-items-center mb-3"><label for="questionCount" class="text-muted">Questions</label><select id="questionCount" class="form-select form-select-sm" style="max-width:110px"><option value="5">5</option><option value="10" selected>10</option><option value="15">15</option><option value="20">20</option></select></div>
+        <button id="btnStart" class="btn btn-dark w-100" type="button">Start Writing Quiz</button>
+      </div></div></div>
+    </section>
+
+    <section id="quizArea" class="card shadow-sm d-none"><div class="card-header bg-light d-flex justify-content-between align-items-center"><div><span id="progressPill" class="badge bg-secondary pill">Q 1/10</span><span id="scorePill" class="badge bg-primary pill ms-2">Score: 0</span></div><button id="btnStop" class="btn btn-sm btn-outline-danger" type="button">Stop Quiz</button></div>
+      <div class="card-body"><p class="text-muted mb-1">Write this in French:</p><h2 id="questionText" class="fw-bold mb-2"></h2><p id="metaText" class="small text-muted mb-3"></p>
+        <label for="answerInput" class="form-label">Your French answer</label><input id="answerInput" class="form-control form-control-lg" type="text" autocomplete="off" lang="fr" spellcheck="true"><p class="form-text">Capital letters and extra spaces are ignored. Accents and spelling count.</p>
+        <div class="d-flex gap-2"><button id="btnCheck" class="btn btn-dark" type="button">Check answer</button><button id="btnNext" class="btn btn-primary d-none" type="button">Next</button></div><div id="feedback" class="alert d-none mt-3 mb-0" role="status"></div>
+      </div>
+    </section>
+
+    <section id="resultArea" class="card shadow-sm d-none"><div class="card-body"><div class="text-center"><h2 class="fw-bold mb-2">Writing Quiz Complete</h2><div id="finalScore" class="display-6 mb-3">0 / 0</div><button id="btnReplay" class="btn btn-dark" type="button">Start another quiz</button></div><div id="missedArea" class="mt-4 d-none"><h3 class="h5">Words to review</h3><ul id="missedList" class="list-group"></ul></div></div></section>
+  </main>
+  <script src="static/js/words-data.js"></script><script src="static/js/writing.js"></script>
+</body>
+</html>

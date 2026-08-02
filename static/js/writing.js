@@ -15,7 +15,10 @@ function flattenData(sets) { return sets.flatMap(setName => Object.entries(windo
 function renderSetPicker() {
   const saved = JSON.parse(localStorage.getItem("writingSelectedSets") || "[]");
   const names = Object.keys(window.DATA || {}); const selected = saved.length ? saved : names;
-  setPicker.innerHTML = names.map((name, i) => `<div class="form-check practice-set-option"><input class="form-check-input writing-set" type="checkbox" value="${name}" id="writing-set-${i}" ${selected.includes(name) ? "checked" : ""}><label class="form-check-label" for="writing-set-${i}">${name}</label></div>`).join("");
+  setPicker.innerHTML = names.map((name, i) => {
+    const compactName = name.replace(/^Set\s+/i, "");
+    return `<div class="form-check practice-set-option"><input class="form-check-input writing-set" type="checkbox" value="${name}" id="writing-set-${i}" ${selected.includes(name) ? "checked" : ""}><label class="form-check-label" for="writing-set-${i}" title="${name}">${compactName}</label></div>`;
+  }).join("");
   setPicker.addEventListener("change", () => localStorage.setItem("writingSelectedSets", JSON.stringify(selectedSets())));
 }
 

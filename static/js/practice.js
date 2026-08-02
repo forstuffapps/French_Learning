@@ -8,6 +8,8 @@
     const btnStart = document.getElementById("btnStart");
     const questionCountEl = document.getElementById("questionCount");
     const setPicker = document.getElementById("setPicker");
+    const setupArea = document.getElementById("setupArea");
+    const quizSetLabel = document.getElementById("quizSetLabel");
     const btnSelectAllSets = document.getElementById("btnSelectAllSets");
     const btnClearSets = document.getElementById("btnClearSets");
 
@@ -66,9 +68,10 @@
         const id = `practice-set-${setName.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`;
         const wrapper = document.createElement("div");
         wrapper.className = "form-check practice-set-option";
+        const compactName = setName.replace(/^Set\s+/i, "");
         wrapper.innerHTML = `
           <input class="form-check-input practice-set-input" type="checkbox" value="${setName}" id="${id}">
-          <label class="form-check-label" for="${id}">${setName}</label>`;
+          <label class="form-check-label" for="${id}" title="${setName}">${compactName}</label>`;
         const input = wrapper.querySelector("input");
         input.checked = selectedSets.includes(setName);
         input.addEventListener("change", saveSelectedSets);
@@ -91,6 +94,10 @@
       saveSelectedSets();
     }
 
+    function formatSetLabel(setNames) {
+      return `Sets: ${setNames.map(name => name.replace(/^Set\s+/i, "")).join(", ")}`;
+    }
+
     function sampleWrongOptions(allItems, correctEn, count = 2) {
       // pick distinct wrong English meanings
       const pool = allItems.map(x => x.en).filter(en => en && en !== correctEn);
@@ -104,6 +111,7 @@
     let qIndex = 0;
     let score = 0;
     let locked = false;
+    let missed = [];
 
     function buildQuestions(n) {
       const shuffled = shuffle(allItems);
@@ -138,6 +146,7 @@
 
           const isCorrect = opt === q.en;
           if (isCorrect) score++;
+          else missed.push(q);
 
           // Show the correct answer and the selected incorrect answer.
           for (const child of optionsEl.querySelectorAll("button")) {
@@ -164,6 +173,12 @@
       resultArea.classList.remove("d-none");
       btnReplayTop.classList.add("d-none");
       finalScore.textContent = `${score} / ${questions.length}`;
+      const missedArea = document.getElementById("missedArea");
+      const missedList = document.getElementById("missedList");
+      missedList.innerHTML = missed.map(item =>
+        `<li class="list-group-item"><strong>${item.fr}</strong> — ${item.en}</li>`
+      ).join("");
+      missedArea.classList.toggle("d-none", !missed.length);
     }
 
     function startQuiz() {
@@ -190,11 +205,14 @@
       questions = buildQuestions(n);
       qIndex = 0;
       score = 0;
+      missed = [];
 
       resultArea.classList.add("d-none");
+      setupArea.classList.add("d-none");
       quizArea.classList.remove("d-none");
       btnStop.classList.remove("d-none");
       btnReplayTop.classList.remove("d-none");
+      quizSetLabel.textContent = formatSetLabel(selectedSets);
 
       renderQuestion();
     }
@@ -208,8 +226,9 @@
       }
     }
 
-    function replay() {
-      startQuiz();
+    function showConfiguration() {
+      resultArea.classList.add("d-none");
+      setupArea.classList.remove("d-none");
     }
 
     function stopQuiz() {
@@ -219,8 +238,8 @@
     // ---------- Events ----------
     btnStart.addEventListener("click", startQuiz);
     btnNext.addEventListener("click", nextQuestion);
-    btnReplay.addEventListener("click", replay);
-    btnReplayTop.addEventListener("click", replay);
+    btnReplay.addEventListener("click", showConfiguration);
+    btnReplayTop.addEventListener("click", startQuiz);
     btnStop.addEventListener("click", stopQuiz);
     btnSelectAllSets.addEventListener("click", () => setAllSets(true));
     btnClearSets.addEventListener("click", () => setAllSets(false));

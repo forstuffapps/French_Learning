@@ -47,7 +47,7 @@
   
 
 
-  <div class="container mb-4">
+  <div id="setupArea" class="container mb-4">
     <div class="row g-4">
       <div class="col-12 text-center">
         <h1 class="display-6 fw-bold">Practice Quiz</h1>
@@ -59,7 +59,7 @@
             <fieldset class="mb-3">
               <legend class="fs-6 mb-2">Vocabulary sets</legend>
               <p class="small text-muted mb-2">Choose one or more sets to include in this quiz.</p>
-              <div id="setPicker" class="d-flex flex-wrap gap-2" aria-label="Vocabulary sets"></div>
+              <div id="setPicker" class="d-flex flex-wrap gap-1" aria-label="Vocabulary sets"></div>
               <div class="mt-2 d-flex gap-2">
                 <button id="btnSelectAllSets" class="btn btn-sm btn-outline-secondary" type="button">Select all</button>
                 <button id="btnClearSets" class="btn btn-sm btn-outline-secondary" type="button">Clear</button>
@@ -88,6 +88,7 @@
         <div>
           <span class="badge bg-secondary pill" id="progressPill">Q 1/10</span>
           <span class="badge bg-primary pill ms-2" id="scorePill">Score: 0</span>
+          <div id="quizSetLabel" class="small text-muted mt-1"></div>
         </div>
         <button id="btnReplayTop" class="btn btn-sm btn-outline-secondary d-none" type="button">Replay</button>
       </div>
@@ -107,10 +108,16 @@
 
     <!-- Result area -->
     <div id="resultArea" class="card shadow-sm d-none">
-      <div class="card-body text-center">
-        <h2 class="fw-bold mb-2">Your Score</h2>
-        <div class="display-6 mb-3" id="finalScore">0 / 10</div>
-        <button id="btnReplay" class="btn btn-dark">Replay Quiz</button>
+      <div class="card-body">
+        <div class="text-center">
+          <h2 class="fw-bold mb-2">Your Score</h2>
+          <div class="display-6 mb-3" id="finalScore">0 / 10</div>
+          <button id="btnReplay" class="btn btn-dark">Configure another quiz</button>
+        </div>
+        <div id="missedArea" class="mt-4 d-none">
+          <h3 class="h5">Words to review</h3>
+          <ul id="missedList" class="list-group"></ul>
+        </div>
       </div>
     </div>
   </div>

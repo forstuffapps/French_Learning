@@ -281,7 +281,7 @@ header a img, footer a img{
 
 .practice-set-option {
   margin: 0;
-  padding: .35rem .6rem .35rem 1.9rem;
+  padding: .25rem .45rem .25rem 1.7rem;
   border: 1px solid #dee2e6;
   border-radius: .5rem;
   background: #fff;
@@ -301,6 +301,7 @@ header a img, footer a img{
 .practice-set-option:has(.form-check-input:checked) {
   border-color: #212529;
 }
+
 
 
 
